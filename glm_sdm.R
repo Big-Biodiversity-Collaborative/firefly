@@ -256,3 +256,4 @@ points(x = obs_data$longitude,
 #     border = "grey5")
 
 glm_predict > glm_threshold
+
