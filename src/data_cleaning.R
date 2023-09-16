@@ -1,4 +1,4 @@
-# Species distribution modeling for southwest spring firefly
+# Data cleaning for the southwest spring firefly
 # Rachel Laura
 # rlaura@arizona.edu
 # 2023-09-11
