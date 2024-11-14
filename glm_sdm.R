@@ -6,27 +6,28 @@
 library(terra)
 library(geodata)
 library(predicts)
+library(sf)
+library(remotes)
+library(geodata)
 
 # Download bioclimatic variable data
 bioclim_data <- worldclim_global(var = "bio", # download all 19 bioclimatic variables
-                                 res = 2.5, # 2.5 minutes of a degree resolution
+                                 res = 0.5, # 0.5 minutes of a degree resolution
                                  path = "data/") # location to download to
 
+# Bring in cienega shapefile and store as SpatVector
+cienegas <- st_read("spat_data/Cienegas_locations_v2/Cienegas_locations_v2.shp")
+cienegas <- vect(cienegas)
+
+# Bring in perennial water shapefile and store as SpatVector
+perennial_reach <- st_read("spat_data/TNC_perennial_reaches.shp")
+perennial_reach <- vect(perennial_reach)
+
 # Read in observations
-# ADD FOR LOOP HERE TO ITERATE THROUGH ALL CSVs IN THIS FOLDER AND DO ALL THE FOLLOWING STEPS
 obs_data <- read.csv(file = "output/bw_obs.csv")
 
 # Check the data to make sure it loaded correctly
 summary(obs_data)
-
-# Save absence points separately
-obs_data_absence <- subset(obs_data, pa == 0)
-
-# Remove absence points
-obs_data <- subset(obs_data, pa == 1)
-
-# Remove NAs (if needed)
-# obs_data <- obs_data[!is.na(obs_data$latitude),]
 
 # Determine geographic extent of our data
 max_lat <- ceiling(max(obs_data$y))
@@ -58,11 +59,22 @@ points(x = obs_data$x,
 # Make an extent that is 25% larger
 sample_extent <- geographic_extent * 1.25
 
-# Crop bioclim data to desired extent
+# Cut it off at the US-Mexico border
+sample_extent <- ext(x = c(-111.125, -109.875, 31.3324, 33.25))
+
+# Write sample extent to shapefile
+sample_extent_vector <- vect(sample_extent, crs="+proj=longlat +datum=WGS84")
+writeVector(sample_extent_vector, "sample_extent.shp", overwrite = TRUE)
+
+# Crop data to desired extent
 bioclim_data <- crop(x = bioclim_data, y = sample_extent)
+cienegas <- crop(x = cienegas, y = sample_extent)
+## Not working: perennial_reach <- crop(x = perennial_reach, y = sample_extent)
 
 # Plot the first of the bioclim variables to check on cropping
 plot(bioclim_data[[1]])
+plot(cienegas)
+plot(perennial_reach)
 
 # Create a set of background points at random, then add these to our data
 
@@ -196,6 +208,11 @@ glm_predict <- predict(bioclim_data, glm_model, type = "response")
 # Print predicted values
 plot(glm_predict)
 
+# Write the glm_predict SpatRaster to file
+glm_predict_raster <- writeRaster(glm_predict, 
+                                  "glm_predict_raster.tif", 
+                                  overwrite = TRUE)
+
 # We now take that model, and evaluate it using the observation data and the 
 # psuedo-absence data we reserved for model testing. We then use this test to 
 # establish a cutoff of occurrence probability to determine the boundaries of 
@@ -244,8 +261,8 @@ plot(glm_predict > glm_threshold,
      col = c(NA, "olivedrab"))
 
 # And add those observations
-points(x = obs_data$longitude,
-       y = obs_data$latitude,
+points(x = obs_data$x,
+       y = obs_data$y,
        col = "black",
        pch = "+",
        cex = 0.75)

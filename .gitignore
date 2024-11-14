@@ -16,3 +16,4 @@ data/gbif*
 GBIF_Records*/*
 *data/
 *output/
+*ECOG-01509/
