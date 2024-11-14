@@ -17,3 +17,4 @@ GBIF_Records*/*
 *data/
 *output/
 *ECOG-01509/
+*.csv
