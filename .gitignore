@@ -16,3 +16,4 @@ data/gbif*
 GBIF_Records*/*
 *output/
 *ECOG-01509/
+spat_data/*
