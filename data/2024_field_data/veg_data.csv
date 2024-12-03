@@ -1,0 +1,11 @@
+﻿pt_id,hab_type,dist_to_water_m,percent_tree_cover
+PS01,riparian,3.3,85
+PS03,woodland,117,93.3
+PS04,riparian,4,80
+PS05,woodland,42.7,58.3
+PS06,woodland,91,83.3
+PS07,woodland,67,61.7
+PS08,riparian,2,100
+PS09,cienega,205,23.3
+PS10,cienega,100,25
+PS11,cienega,67,40
